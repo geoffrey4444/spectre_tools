@@ -23,13 +23,11 @@ if __name__ == "__main__":
     file = h5py.File(args.input, 'a')
     base = "element_data.vol"
     for obs_id in file[base].keys():
-        for cell in file[base][obs_id].keys():
-            for tensor in symmetric_tensors_in_file:
-                for i,comp1 in enumerate(spacetime_components):
-                    for j,comp2 in enumerate(spacetime_components):
-                        if i > j:
-                            file[base][obs_id][cell][tensor+comp1+comp2] = \
-                              h5py.SoftLink("/" + base + "/" + obs_id + "/"
-                                            + cell + "/" + tensor
-                                            + comp2 + comp1)
+        for tensor in symmetric_tensors_in_file:
+            for i,comp1 in enumerate(spacetime_components):
+                for j,comp2 in enumerate(spacetime_components):
+                    if i > j:
+                        file[base][obs_id][tensor+comp1+comp2] = \
+                          h5py.SoftLink("/" + base + "/" + obs_id + "/"
+                                        + tensor + comp2 + comp1)
     file.close()

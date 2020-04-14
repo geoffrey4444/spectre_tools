@@ -17,21 +17,6 @@ def rename_variables(legend_line):
     legend_line = legend_line.replace(' H', ' InitialGaugeH_')
     return legend_line.rstrip()
 
-def get_spectre_points_per_block(spectre_file):
-    """Reads a file produced by spectre's ExportCoordinates
-    and returns two lists: i) the number of points in each block
-    and ii) the names of the blocks."""
-    observation_id = list(spectre_file['element_data.vol'].keys())[0]
-    coords_dict = dict(spectre_file['element_data.vol'][observation_id])
-    components = ['InertialCoordinates_x', 'InertialCoordinates_y', 'InertialCoordinates_z']
-
-    blocks = list(coords_dict.keys())[:]
-
-    points_per_block = []
-    for block in blocks:
-        points_per_block.append(len(coords_dict[block][components[0]]))
-    return np.array(points_per_block), np.array(blocks)
-
 def get_spec_points(spectre_file):
     """Converts points from a file produced by spectre's ExportCoordinates
     to a flat list of points, suitable for SpEC to read in (e.g.,
@@ -39,7 +24,6 @@ def get_spec_points(spectre_file):
     observation_id = list(spectre_file['element_data.vol'].keys())[0]
     coords_dict = dict(spectre_file['element_data.vol'][observation_id])
 
-    blocks = list(coords_dict.keys())[:]
     components = ['InertialCoordinates_x', 'InertialCoordinates_y', 'InertialCoordinates_z']
     dim = len(components)
 
@@ -47,23 +31,9 @@ def get_spec_points(spectre_file):
     for component in components:
         coords.append([])
 
-    for block in blocks:
-        for i,component in enumerate(components):
-            coords[i].append(coords_dict[block][component])
+    for i,component in enumerate(components):
+        coords[i].append(coords_dict[component])
     return np.transpose(np.array([np.concatenate(x) for x in coords]))
-
-def get_spectre_values_from_spec_values(array_1D, blocks, points_per_block):
-    """Take a 1D array of values, listed point-by-point (as returned by spec),
-    and return a dictionary, keyed by block name, of the values at each
-    spectre point. Here blocks is a list of blocks from a spectre volume file,
-    e.g., the file output by ExportCoordinates, and points_per_block is
-    a list containing the number of points in each block."""
-    spectre_values = {}
-    for i,block in enumerate(blocks):
-        start = np.sum(points_per_block[:i])
-        end = start + points_per_block[i]
-        spectre_values[block] = array_1D[start:end]
-    return spectre_values
 
 def write_spec_points_file(spectre_points_filename, spec_points_filename):
     """Read the coordinates from a spectre domain and write them in a
@@ -71,7 +41,6 @@ def write_spec_points_file(spectre_points_filename, spec_points_filename):
     are the name of a spectre points file (e.g. 'VolumeData0.h5') and
     the name of the spec points file to write (e.g. 'PointsList.txt')."""
     spectre_file = h5py.File(spectre_points_filename, 'r')
-    points_per_block, blocks = get_spectre_points_per_block(spectre_file)
     points = get_spec_points(spectre_file)
     spectre_file.close()
     np.savetxt(spec_points_filename, points)
@@ -100,9 +69,8 @@ def insert_spec_data(spectre_points_filename, spec_data_filename):
         legend_dict[key] = i
     spec_file.close()
 
-    # Open file read-only to determine block names, etc.
+    # Open file read-only to determine observation_id
     spectre_file = h5py.File(spectre_points_filename, 'r')
-    points_per_block, blocks = get_spectre_points_per_block(spectre_file)
     observation_id = list(spectre_file['element_data.vol'].keys())[0]
     spectre_file.close()
 
@@ -113,12 +81,7 @@ def insert_spec_data(spectre_points_filename, spec_data_filename):
     for key in legend_dict:
         print("Inserting " + key)
         spec_data = data_to_insert[:, legend_dict[key]]
-        spectre_data = get_spectre_values_from_spec_values(spec_data,
-                                                           blocks,
-                                                           points_per_block)
-        for block in blocks:
-            output_file['element_data.vol'][observation_id][block][key] \
-                = spectre_data[block]
+        output_file['element_data.vol'][observation_id][key] = spec_data
 
     output_file.close()
     return legend_dict, data_to_insert
