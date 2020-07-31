@@ -1,0 +1,49 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch Singiularity",
+            "type": "cppdbg",
+            "request": "launch",
+            //"program": "${workspaceFolder}/build_singularity_debug/bin/RunTests",
+            "program": "${workspaceFolder}/build_singularity_debug/bin/EvolveKerrSchildNumericInitialData",
+            "args": ["--input-file=/home/geoffrey/aps2020/after_aps/noroll/spectre_harmonic_gauge/convergence/h2p8_equidistant/spectre_run_no_filter_gcc/BBH.yaml"],
+            //"args": ["Unit.IO.ReadSpecThirdOrderPiecewisePolynomial"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/home/geoffrey/bin/SingularityGdb.sh",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/EvolveKerrSchildNumericInitialData",
+            "args": ["`--input-file=/home/geoffrey/aps2020/after_aps/noroll/spectre_harmonic_gauge/convergence/h2p8_equidistant/spectre_run_no_filter_gcc/BBH.yaml`"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [{"name": "LD_LIBRARY_PATH", "value": "/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/openblas-0.3.4-tt2coe7yjspglhjqsiyygstq5vkklzye/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/hdf5-1.10.4-ytt4j54awkt3elafpoka3yryxk44widy/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/boost-1.68.0-vgl6ofrw7ykvdr2s3kkasdvkayrk367s/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/yaml-cpp-develop-qcfbbllsdnab3fq2hvn3au7rov3jjb4c/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/libxsmm-1.10-sjh5yzvpmuxmjoihiyalsvouwakferye/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/jemalloc-4.5.0-wlf2m7rql2rsntmcxdiuquthp77ivhwg/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/gsl-2.5-i7icadp3ll2flvcedfra7k6j6wnucnzf/lib:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-x86_64/gcc-7.3.0/libsharp-2018-01-17-4xamgawhbatw3bpbdpfus22vavdir3j2/lib:/opt/ohpc/pub/mpi/openmpi-gnu7/1.10.7/lib:/opt/ohpc/pub/compiler/gcc/7.3.0/lib64:/opt/ohpc/pub/apps/singularity/lib:/opt/ohpc/pub/apps/singularity/lib64:/opt/ohpc/pub/apps/spack/0.12.0/opt/spack/linux-centos7-broadwell/gcc-7.3.0/hdf5-1.12.0-mknp6xvzdcccdfgg3uxr5uu3v7ohmoai/lib"}],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

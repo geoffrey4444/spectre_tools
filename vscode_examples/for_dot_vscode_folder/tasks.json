@@ -1,0 +1,120 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configure spectre",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/support/Environments/ocean_gcc.sh; export SPECTRE_HOME=..; cd ${workspaceFolder}/build; spectre_load_modules; spectre_run_cmake"
+        },
+        {
+            "label": "Build spectre",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/support/Environments/ocean_gcc.sh; spectre_load_modules; cd ${workspaceFolder}/build; make -j10",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Build spectre test-executables",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/support/Environments/ocean_gcc.sh; spectre_load_modules; cd ${workspaceFolder}/build; make -j8 test-executables",
+            "group": "build"
+        },
+        {
+            "label": "Test spectre",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/support/Environments/ocean_gcc.sh; cd ${workspaceFolder}/build; spectre_load_modules; ctest -j10 --output-on-failure",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build docs for spectre",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/support/Environments/ocean_gcc.sh; spectre_load_modules; cd ${workspaceFolder}/build; make doc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Load modules for spectre",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/support/Environments/ocean_gcc.sh; spectre_load_modules"
+        },
+        {
+            "label": "Singularity: configure spectre",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_debug; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif cmake -D CMAKE_Fortran_COMPILER=gfortran-9 -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ -D CHARM_ROOT=/opt/ohpc/pub/apps/charm/mpi-linux-x86_64-smp -D CMAKE_BUILD_TYPE=Debug -D BUILD_PYTHON_BINDINGS=ON -D MEMORY_ALLOCATOR=SYSTEM -DUSE_SPHINX=OFF -DASAN=OFF ..",
+            "group": "build"
+        },
+        {
+            "label": "Singularity: build spectre",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_debug; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif make -j10",
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Singularity: build spectre test-executables",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_debug; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif make -j8 test-executables",
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Singularity: run tests",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_debug; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif ctest -j5",
+            "group": "test"
+        },
+        {
+            "label": "Release Singularity: configure spectre",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_release; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif cmake -D CMAKE_Fortran_COMPILER=gfortran-9 -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++ -D CHARM_ROOT=/opt/ohpc/pub/apps/charm/mpi-linux-x86_64-smp -D CMAKE_BUILD_TYPE=Release -D BUILD_PYTHON_BINDINGS=ON -D MEMORY_ALLOCATOR=SYSTEM -D ASAN=OFF ..",
+            "group": "build"
+        },
+        {
+            "label": "Release Singularity: build spectre",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_release; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif make -j10",
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Release Singularity: build spectre test-executables",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_release; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif make test-executables",
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Release Singularity: run tests",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build_singularity_release; module load singularity; singularity exec /opt/ohpc/pub/containers/spectre_ocean.sif ctest -j10",
+            "group": "test"
+        },
+        {
+            "label": "Singularity: shell",
+            "type": "shell",
+            "command": "module load singularity; singularity shell /opt/ohpc/pub/containers/spectre_ocean.sif",
+            "group": "test"
+        }
+    ]
+}
+
