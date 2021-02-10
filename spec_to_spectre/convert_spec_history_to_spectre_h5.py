@@ -41,6 +41,31 @@ def parse_history_file(lines):
     return matrix
 
 
+def remove_nonmonotonic_times(parsed_history_data):
+    # Keep the latest occurance, so reverse the list, so latest times are first
+    reversed = parsed_history_data
+    reversed.reverse()
+
+    # Check last update time for uniqueness, since that is what SpECTRE checks
+    # Time of last update is in column 1
+    next_time = reversed[0][1]
+    prev_time = next_time
+    first_row = False
+
+    result = []
+
+    for row in parsed_history_data:
+        if (first_row):
+            result.append(row)
+            first_row = True
+            prev_time = row[1]
+        elif row[1] < prev_time:
+            result.append(row)
+            prev_time = row[1]
+    result.reverse()
+    return result
+
+
 def legend():
     return [
         "Time", "TimeLastUpdate", "Nc", "DerivOrder", "Version", "f", "dtf",
@@ -75,6 +100,7 @@ if __name__ == "__main__":
 
     for history_file in args.files:
         print("Converting " + history_file)
-        append_to_file(parse_history_file(read_history_file(history_file)),
-                       args.output,
-                       parse_history_file_name(history_file.split("/")[-1]))
+        append_to_file(
+            remove_nonmonotonic_times(
+                parse_history_file(read_history_file(history_file))),
+            args.output, parse_history_file_name(history_file.split("/")[-1]))
