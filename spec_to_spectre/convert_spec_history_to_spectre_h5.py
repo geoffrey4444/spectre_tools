@@ -21,14 +21,9 @@ def parse_history_line(line):
             history_line_values.append(float(pair.split('=')[-1]))
         except:
             continue
-    # History file should have 9 columns for 3rd order piecewise polynomials,
-    # which is what SpECTRE expects. If 8 columns, assume that the history
-    # file is a 2nd order piecewise polynomial, and set the third derivative
-    # to zero.
-    if len(history_line_values) == 8 and history_line_values[3] == 2.0:
-        history_line_values.append(0.0)
-        return history_line_values
-    elif len(history_line_values) == 9:
+    # SpECTRE currently supports 2nd order or 3rd order piecewise polynomials,
+    # which have 8 or 9 columns, respectively.
+    if len(history_line_values) == 8 or len(history_line_values) == 9:
         return history_line_values
     else:
         sys.exit("Error: wrong number of columns in history file")
@@ -66,11 +61,19 @@ def remove_nonmonotonic_times(parsed_history_data):
     return result
 
 
-def legend():
-    return [
+def legend(converted_history_data):
+    legend_second_order = [
+        "Time", "TimeLastUpdate", "Nc", "DerivOrder", "Version", "f", "dtf",
+        "dt2f"
+    ]
+    legend_third_order = [
         "Time", "TimeLastUpdate", "Nc", "DerivOrder", "Version", "f", "dtf",
         "dt2f", "dt3f"
     ]
+    if len(converted_history_data[0]) == 8:
+        return legend_second_order
+    else:
+        return legend_third_order
 
 
 def parse_history_file_name(name):
@@ -80,7 +83,9 @@ def parse_history_file_name(name):
 
 def append_to_file(converted_history_data, output, name):
     file_spec = spectre_h5.H5File(file_name=output, append_to_file=True)
-    file_spec.insert_dat(path="/" + name, legend=legend(), version=0)
+    file_spec.insert_dat(path="/" + name,
+                         legend=legend(converted_history_data),
+                         version=0)
     datfile = file_spec.get_dat(path="/" + name)
     for row in converted_history_data:
         datfile.append(list(row))
