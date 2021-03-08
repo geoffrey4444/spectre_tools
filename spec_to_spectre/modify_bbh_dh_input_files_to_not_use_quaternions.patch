@@ -1,0 +1,339 @@
+diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuat/GrStateChangers.input
+--- ./Ev/GrStateChangers.input	2021-03-08 11:33:08.948782586 -0800
++++ ./EvNoQuat/GrStateChangers.input	2021-03-08 11:33:17.915890455 -0800
+@@ -4,20 +4,21 @@
+              UpdateDependsOn=AhA,AhB;),
+     Scaling(EventTriggerForApply=EveryChunk;DenseTriggerForUpdate=ChunkFraction;
+             UpdateDependsOn=AhA,AhB;),
+-    Translation(EventTriggerForApply=EveryChunk;
++    Translation(EventTriggerForApply=Never;
+                 DenseTriggerForUpdate=ChunkFraction;
+                 UpdateDependsOn=AhA,AhB;),
+-    CutX(EventTriggerForApply=EveryChunk;DenseTriggerForUpdate=ChunkFraction;),
+-    Skew(EventTriggerForApply=EveryChunk;DenseTriggerForUpdate=ChunkFraction;
++    CutX(EventTriggerForApply=Never;DenseTriggerForUpdate=ChunkFraction;),
++    Skew(EventTriggerForApply=Never;DenseTriggerForUpdate=ChunkFraction;
+          UpdateDependsOn=AhA,AhB;),
+-    ShapeA(EventTriggerForApply=EveryChunk;DenseTriggerForUpdate=ChunkFraction;
++    ShapeA(EventTriggerForApply=Never;DenseTriggerForUpdate=ChunkFraction;
+            UpdateDependsOn=AhA;),
+-    ShapeB(EventTriggerForApply=EveryChunk;DenseTriggerForUpdate=ChunkFraction;
++    ShapeB(EventTriggerForApply=Never;DenseTriggerForUpdate=ChunkFraction;
+            UpdateDependsOn=AhB;),
+     SizeA(EventTriggerForApply=Every3Steps;DenseTriggerForUpdate=EveryStep),
+     SizeB(EventTriggerForApply=Every3Steps;DenseTriggerForUpdate=EveryStep);
+ 
+ StateChangerEventTriggers =
++    Never(Trigger=Never;),
+     EveryChunk(Trigger=EveryNChunks(NChunks=1;NoTriggerOnZero=yes)),
+     Every3Steps(Trigger=EveryNSteps(NSteps = 3; NoTriggerOnZero = yes;)),
+     Every3StepsIncludingFirst(Trigger=EveryNSteps(NSteps = 3; 
+@@ -71,20 +72,20 @@
+       StateChanger=
+       ControlNthDeriv
+       (
+-       FunctionVsTime      = QuatRotMatrix;
++       FunctionVsTime      = RotationAngle;
+        MeasureControlParam =
+-       RotationInvariantRotation(SurfaceInfoA=AhA;
++       RotationTwoAH(
++         SurfaceInfoA=AhA;
+                                  SurfaceIdA  =;
+                                  SurfaceInfoB=AhB;
+                                  SurfaceIdB  =;
+-                                 CenterA=__xA__,__yA__,__zA__;
+-                                 CenterB=__xB__,__yB__,__zB__;
++         TargetAngle =; #default empty, i.e., zero
+        );
+ 
+        Controller = PNd(AdjustForTimeOffset = yes;);
+ 
+        Averager=Exp(Taverage        = Fraction(Value=__TaverageFac__;);
+-                    CheckpointFile  = Cp-QuatRotMatrix.txt;
++                    CheckpointFile  = Cp-RotationAngle.txt;
+                     UseAverageQ     = false;
+        );
+ 
+@@ -101,7 +102,7 @@
+                                InitialState   = Specified
+                                (Tdamping=__Tdamping__);
+                                CheckpointFile =
+-                               Cp-TdampQuatRotMatrix.txt;);
++                               Cp-TdampRotationAngle.txt;);
+       )),
+     Translation(
+       StateChanger=
+diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuat/SpatialCoordMap.input
+--- ./Ev/SpatialCoordMap.input	2021-03-08 11:33:08.948782586 -0800
++++ ./EvNoQuat/SpatialCoordMap.input	2021-03-08 11:33:17.915890455 -0800
+@@ -1,48 +1,19 @@
++# Not used: __AltRmax__;
+ DataBoxItems=
+-    Domain(Items =
+-           AddBinarySpatialCoordMaps
+-           (OutputFile               = AddBinarySpatialCoordMaps.output;
+-            OuterBdryRadius          = __Rmax__;
+-            ExtendedOuterBdryRadius  = __AltRmax__;
+-            TransMapMaxRadius        = __Rmax__;
+-            StartTime                = __StartTime__;
+-            ExpansionDerivOrder      = 2;
+-            RotationDerivOrder       = 3;
+-            TranslationDerivOrder    = 2;
+-            InitialData              =
+-            FromBeginning
+-            (DtYaw = __Omega__;
+-             DtExpansion = __aDot__;
+-             MatchDir = __MapDir__;
+-             MatchTime = __StartTime__;
+-             
+-             #empty string = use identity
+-             TransCpFile = ID_Init_FuncTrans.txt;
+-             ExpCpFile = ;
+-             RotCpFile = ;
+-             SkewCpFile = ;
+-             
+-             #initialize shape and size maps from initial data
+-             ShapeACpFile = ID_Init_FuncLambdaFactorA.txt;
+-             ShapeBCpFile = ID_Init_FuncLambdaFactorB.txt;
+-             A0CpFile=ID_Init_FuncLambdaFactorA0.txt;
+-             B0CpFile=ID_Init_FuncLambdaFactorB0.txt;
+-             );
+-            ExpansionFactorOuterBdry = ExpansionFactorOuterBdry;
+-            AddDistortionMap  = yes;
+-            CenterA           = __xA__,__yA__,__zA__;
+-            CenterB           = __xB__,__yB__,__zB__;
+-            LControlA         = __LControlA__;
+-            LControlB         = __LControlB__;
+-            SkewMap::Rmax     = __SkewMapRmax__;
+-            AddSkewMap        = yes;
+-            # The CutX translation map is part of the
+-            # GridToDistorted mapping.
+-            AddCutXCorrection = yes;
+-            # The following is for debugging only.
+-            # Use it to get the frame after shape control
+-            # but before cutX translation.
+-            AddGridToShapeFrame = no;
++Domain(Items =
++          FunctionVsTime(Output= Unity;
++                    FunctionVsTime=Formula
++                    (f      = 1.0;
++                     dtf     = 0.0;
++                     dt2f = 0.0;);),
++          FunctionVsTime(Output= RotationAngle;
++                    FunctionVsTime=NthTimeDeriv
++                    (DerivOrder=3;
++                     ComponentLabels=Specified(Labels=Phi);
++                     InitialData=Values(f      = 0.0;
++                                        df     = __Omega__;
++                                        Tstart = 0);
++                     FileBaseName=FuncRotationAngle);
+             ),
+            FunctionVsTime(Output         = ExpansionFactorOuterBdry;
+                           FunctionVsTime = FixedSpeedCubic
+@@ -50,5 +21,206 @@
+                            TimeScale = __ExpFacTimeScale__;
+                            FixedSpeed= __FixedSpeed__;
+                            );
++                          ),
++          FunctionVsTime(Output        =LambdaFactorA;
++                 FunctionVsTime=NthTimeDeriv
++                 (DerivOrder   =2;
++                  ComponentLabels=YlmCoefs(MinL          = 1;
++                                ZSymmetric    = no;
++                                OnlyEvenL     = false;
++                                IncludeL1Mode = true;
++                                MaxL=__LControlA__);
++              InitialData = FromCheckpointFile
++              (File=__MapDir__/ID_Init_FuncLambdaFactorA.txt;
++               Time=__StartTime__;
++               Eps =1.e-5;
++              );
++                  FileBaseName  = FuncLambdaFactorA;
++                  );
++          ),
++          FunctionVsTime(Output        = LambdaFactorA0;
++                         FunctionVsTime=NthTimeDeriv
++                         (DerivOrder     =3;
++                         ComponentLabels=YlmCoefs(MinL = 0;
++                                OnlyEvenL     = false;
++                                IncludeL1Mode = true;
++                                ZSymmetric    = no;
++                                                  MaxL = 0);
++              InitialData = FromCheckpointFile
++              (File=__MapDir__/ID_Init_FuncLambdaFactorA0.txt;
++               Time=__StartTime__;
++               Eps =1.e-5;
++              );
++                         FileBaseName  = FuncLambdaFactorA0;
++                        );
++           ),
++          FunctionVsTime(Output        =LambdaFactorB;
++                 FunctionVsTime=NthTimeDeriv
++                 (DerivOrder   =2;
++                  ComponentLabels=YlmCoefs(MinL          = 1;
++                                ZSymmetric    = no;
++                                OnlyEvenL     = false;
++                                IncludeL1Mode = true;
++                                MaxL=__LControlB__);
++              InitialData = FromCheckpointFile
++              (File=__MapDir__/ID_Init_FuncLambdaFactorB.txt;
++               Time=__StartTime__;
++               Eps =1.e-5;
+                           );
++                  FileBaseName  = FuncLambdaFactorB;
+            );
++          ),
++          FunctionVsTime(Output        = LambdaFactorB0;
++                         FunctionVsTime=NthTimeDeriv
++                         (DerivOrder     =3;
++                         ComponentLabels=YlmCoefs(MinL = 0;
++                                OnlyEvenL     = false;
++                                IncludeL1Mode = true;
++                                ZSymmetric    = no;
++                                                  MaxL = 0);
++              InitialData = FromCheckpointFile
++              (File=__MapDir__/ID_Init_FuncLambdaFactorB0.txt;
++               Time=__StartTime__;
++               Eps =1.e-5;
++              );
++                         FileBaseName  = FuncLambdaFactorB0;
++                        );
++           ),
++     FunctionVsTime(Output        = SkewAngle;
++                    FunctionVsTime=NthTimeDeriv
++                    (DerivOrder=2;
++                     ComponentLabels=
++                      Specified(Labels=SkewY,SkewZ);
++                     InitialData=
++Values(Tstart = __StartTime__;f=0;df=0;d2f=0);
++                     FileBaseName=FuncSkewAngle);
++                    ),
++     FunctionVsTime(Output        = CutX;
++                    FunctionVsTime=NthTimeDeriv
++                    (DerivOrder=2;
++                     ComponentLabels=
++                      Specified(Labels=CutX);
++                       InitialData=
++Values(Tstart = __StartTime__;f=0;df=0;d2f=0);
++                     FileBaseName=FuncCutX);
++                    ),
++     FunctionVsTime(Output= QuatRotMatrix;
++                    FunctionVsTime=NthTimeDerivRotInv
++                    (DerivOrder=3;
++                     ComponentLabels=Specified(Labels=Quat1,Quat2,Quat3,Quat4);
++                     InitialData=Values(f      = 1.0,0.0,0.0,0.0;
++                                        df     = 0.0,0.0,0.0,__Omega__;
++                                        Tstart = __StartTime__);
++                     FileBaseName=FuncQuatRotMatrix);
++                    ),
++     FunctionVsTime(Output        = Trans;
++                    FunctionVsTime=NthTimeDeriv
++                    (DerivOrder=2;
++                     ComponentLabels=Specified(Labels=Tx,Ty,Tz);
++              InitialData = FromCheckpointFile
++              (File=__MapDir__/ID_Init_FuncTrans.txt;
++               Time=__StartTime__;
++               Eps =1.e-5;
++              );
++                     FileBaseName=FuncTrans);
++                    ),
++     FunctionVsTime(Output= ExpansionFactor;
++                    FunctionVsTime=NthTimeDeriv
++                    (DerivOrder     =2;
++                     ComponentLabels=Specified(Labels=a);
++                     InitialData=Values(f      = 1.0;
++                                        df     = __aDot__;
++                                        Tstart = __StartTime__);
++                     FileBaseName=FuncExpansionFactor);
++                    )
++,
++AddSpatialCoordMapHolder(
++SpatialCoordMaps=
++Shape(Map=          MultiDistortedSphereAllYlm(
++          InputFrameIsGridFrame=yes;
++          CutoffEpsForAdaptiveL=1.e-20;
++          LambdaFnVsTime[0]   = LambdaFactorA0,LambdaFactorA;
++          LambdaFnVsTime[1]   = LambdaFactorB0,LambdaFactorB;
++          DistortedSphereMapFunction[0]=CutSphere(
++               CenterA            = __xA__, __yA__, __zA__;
++               CenterB            = __xB__, __yB__, __zB__;
++               SubdomainLabel     = A;
++          );
++          DistortedSphereMapFunction[1]=CutSphere(
++               CenterA            = __xA__, __yA__, __zA__;
++               CenterB            = __xB__, __yB__, __zB__;
++               SubdomainLabel     = B;
++          );
++          ComponentLabels[0]=YlmCoefs(MinL=0;MaxL=__LControlA__;
++                                      ZSymmetric=no;OnlyEvenL=no;
++                                      IncludeL1Mode=yes);
++          ComponentLabels[1]=YlmCoefs(MinL=0;MaxL=__LControlB__;
++                                      ZSymmetric=no;OnlyEvenL=no;
++                                      IncludeL1Mode=yes);
++          )),
++Skew(Map=SpatiallyDependentSkewYZ
++                          (SkewAngle = SkewAngle;
++                            Rmax = __SkewMapRmax__;
++                            # wave extraction starts here
++                           SubdomainGeometry =
++                              CutSphere(CenterA = __xA__, __yA__, __zA__;
++                                        CenterB = __xB__, __yB__, __zB__);
++                          )),
++ShapeAndCutX(Map=TranslationXForCutSphereWithShape
++                           (CenterA= __xA__, __yA__, __zA__;
++                            CenterB= __xB__, __yB__, __zB__;
++                            Func=CutX;
++                            Tolerance=1.e-14;
++                            ShapeMapKeyInHolder=Shape;
++                          );
++),
++RotScaleTrans(Map=Compose(
++  InitialMap = Compose(
++       InitialMap = CubicScale(
++         R = __Rmax__;
++         a0 = 1.0;
++         Dim = 3;
++         ExpansionFactor = ExpansionFactor;
++       );
++       FinalMap = RotationAndScaling(
++         ExpansionFactor=Unity;
++         UseLog=no;
++         RotationAngle=RotationAngle;
++       );
++  );
++  FinalMap = SpatiallyDependentTranslation(
++    TranslationFunction = Trans;
++    Center              = 0.0,0.0,0.0;
++    RadialFunction      =   GeneralizedGaussian(
++    Center  = 0.0;
++    Width   =__Rmax__;
++    Falloff = 38;
++    Power   = 2;
++  );
++);
++)
++)),
++SpatialCoordMapItems
++     (Map=ComposeSpatialCoordMapsFromHolder(SpatialDim=3;
++               DisableCaching=false;
++               RestrictCachingToTheseSubdomains =*;
++               Map=ShapeAndCutX>>Skew>>RotScaleTrans;);
++      Prefix      = GridToInertial;
++      InputCoords = <<Grid>>;
++     ),
++SpatialCoordMapItems
++     (Map=ComposeSpatialCoordMapsFromHolder(SpatialDim=3;
++               DisableCaching=false;
++               RestrictCachingToTheseSubdomains =*;
++               Map=ShapeAndCutX;);
++      Prefix      = GridToDistorted;
++      InputCoords = <<Grid>>;
++     ),
++SpatialCoordMapItems
++     (Map=ComposeSpatialCoordMapsFromHolder(SpatialDim=3;
++               DisableCaching=false;
++               RestrictCachingToTheseSubdomains =*;
++               Map=Skew>>RotScaleTrans;);
++      Prefix      = DistortedToInertial;
++      InputCoords = GridToDistorted::MappedCoords;
++     ));
