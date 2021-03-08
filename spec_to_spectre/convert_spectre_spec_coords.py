@@ -52,7 +52,7 @@ def insert_spec_data(spectre_points_filename, spec_data_filename):
     spectre_points_filename. Note that this function will rename some
     variables if it finds them by calling rename_variables()"""
     # Read the interpolated data into a numpy array
-    data_to_insert = np.genfromtxt(spec_data_filename)
+    data_to_insert = np.loadtxt(spec_data_filename)
 
     # Get the legend
     spec_file = open(spec_data_filename, 'r')
