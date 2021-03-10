@@ -1,7 +1,11 @@
-diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuat/GrStateChangers.input
+diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuatFaster/GrStateChangers.input
 --- ./Ev/GrStateChangers.input	2021-03-08 11:33:08.948782586 -0800
-+++ ./EvNoQuat/GrStateChangers.input	2021-03-08 11:33:17.915890455 -0800
-@@ -4,20 +4,21 @@
++++ ./EvNoQuatFaster/GrStateChangers.input	2021-03-10 08:48:10.089346830 -0800
+@@ -1,23 +1,25 @@
++# Unused keys: __TdampingShapeA__ __TdampingShapeB__
+ StateChangers =
+     Rotation(EventTriggerForApply  =EveryChunk;
+              DenseTriggerForUpdate=ChunkFraction;
               UpdateDependsOn=AhA,AhB;),
      Scaling(EventTriggerForApply=EveryChunk;DenseTriggerForUpdate=ChunkFraction;
              UpdateDependsOn=AhA,AhB;),
@@ -28,7 +32,7 @@ diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuat/GrStateChangers.input
      EveryChunk(Trigger=EveryNChunks(NChunks=1;NoTriggerOnZero=yes)),
      Every3Steps(Trigger=EveryNSteps(NSteps = 3; NoTriggerOnZero = yes;)),
      Every3StepsIncludingFirst(Trigger=EveryNSteps(NSteps = 3; 
-@@ -71,20 +72,20 @@
+@@ -71,20 +73,20 @@
        StateChanger=
        ControlNthDeriv
        (
@@ -54,7 +58,7 @@ diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuat/GrStateChangers.input
                      UseAverageQ     = false;
         );
  
-@@ -101,7 +102,7 @@
+@@ -101,7 +103,7 @@
                                 InitialState   = Specified
                                 (Tdamping=__Tdamping__);
                                 CheckpointFile =
@@ -63,9 +67,46 @@ diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuat/GrStateChangers.input
        )),
      Translation(
        StateChanger=
-diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuat/SpatialCoordMap.input
+@@ -138,7 +140,7 @@
+                                MinDampTime = __MinDampTime__;
+                                MaxDampTime = __MaxDampTime__;
+                                InitialState   = Specified
+-                               (Tdamping=__Tdamping__);
++                               (Tdamping=__MaxDampTime__);
+                                CheckpointFile =
+                                Cp-TdampTrans.txt;);
+       )),
+@@ -178,8 +180,7 @@
+                                MinDampTime = 5*(__MinDampTime__);
+                                MaxDampTime = __MaxDampTime__;
+                                InitialState   = Specified
+-                               (Tdamping=0.5*(5*(__MinDampTime__)
+-                                               +(__MaxDampTime__)));
++                               (Tdamping=__MaxDampTime__);
+                                CheckpointFile =
+                                Cp-TdampSkew.txt;);
+       );
+@@ -257,7 +258,7 @@
+                                MinDampTime = __MinDampTime__;
+                                MaxDampTime = __MaxDampTime__;
+                                InitialState   = Specified
+-                               (Tdamping=__TdampingShapeA__);
++                               (Tdamping=__MaxDampTime__);
+                                  CheckpointFile =
+                                Cp-TdampControlLambdaFactorA.txt;);
+       );
+@@ -297,7 +298,7 @@
+                                MinDampTime = __MinDampTime__;
+                                MaxDampTime = __MaxDampTime__;
+                                InitialState   = Specified
+-                               (Tdamping=__TdampingShapeB__);
++                               (Tdamping=__MaxDampTime__);
+                                CheckpointFile =
+                                Cp-TdampControlLambdaFactorB.txt;);
+       );
+diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuatFaster/SpatialCoordMap.input
 --- ./Ev/SpatialCoordMap.input	2021-03-08 11:33:08.948782586 -0800
-+++ ./EvNoQuat/SpatialCoordMap.input	2021-03-08 11:33:17.915890455 -0800
++++ ./EvNoQuatFaster/SpatialCoordMap.input	2021-03-10 08:48:10.090346842 -0800
 @@ -1,48 +1,19 @@
 +# Not used: __AltRmax__;
  DataBoxItems=
