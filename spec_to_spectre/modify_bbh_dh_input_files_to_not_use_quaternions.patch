@@ -1,6 +1,6 @@
-diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuatFaster/GrStateChangers.input
---- ./Ev/GrStateChangers.input	2021-03-08 11:33:08.948782586 -0800
-+++ ./EvNoQuatFaster/GrStateChangers.input	2021-03-10 08:48:10.089346830 -0800
+diff -ruNb ./orig/GrStateChangers.input ./mod/GrStateChangers.input
+--- ./orig/GrStateChangers.input	2021-06-09 18:49:15.892697368 -0700
++++ ./mod/GrStateChangers.input	2021-06-09 18:51:11.661132244 -0700
 @@ -1,23 +1,25 @@
 +# Unused keys: __TdampingShapeA__ __TdampingShapeB__
  StateChangers =
@@ -104,10 +104,10 @@ diff -ruNb ./Ev/GrStateChangers.input ./EvNoQuatFaster/GrStateChangers.input
                                 CheckpointFile =
                                 Cp-TdampControlLambdaFactorB.txt;);
        );
-diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuatFaster/SpatialCoordMap.input
---- ./Ev/SpatialCoordMap.input	2021-03-08 11:33:08.948782586 -0800
-+++ ./EvNoQuatFaster/SpatialCoordMap.input	2021-03-10 08:48:10.090346842 -0800
-@@ -1,48 +1,19 @@
+diff -ruNb ./orig/SpatialCoordMap.input ./mod/SpatialCoordMap.input
+--- ./orig/SpatialCoordMap.input	2021-06-09 18:49:15.892697368 -0700
++++ ./mod/SpatialCoordMap.input	2021-06-09 18:59:26.920266115 -0700
+@@ -1,49 +1,19 @@
 +# Not used: __AltRmax__;
  DataBoxItems=
 -    Domain(Items =
@@ -141,6 +141,7 @@ diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuatFaster/SpatialCoordMap.input
 -             );
 -            ExpansionFactorOuterBdry = ExpansionFactorOuterBdry;
 -            AddDistortionMap  = yes;
+-            IncludeL1ModeInShape = no;
 -            CenterA           = __xA__,__yA__,__zA__;
 -            CenterB           = __xB__,__yB__,__zB__;
 -            LControlA         = __LControlA__;
@@ -171,7 +172,7 @@ diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuatFaster/SpatialCoordMap.input
              ),
             FunctionVsTime(Output         = ExpansionFactorOuterBdry;
                            FunctionVsTime = FixedSpeedCubic
-@@ -50,5 +21,206 @@
+@@ -51,5 +21,206 @@
                             TimeScale = __ExpFacTimeScale__;
                             FixedSpeed= __FixedSpeed__;
                             );
@@ -330,11 +331,11 @@ diff -ruNb ./Ev/SpatialCoordMap.input ./EvNoQuatFaster/SpatialCoordMap.input
 +),
 +RotScaleTrans(Map=Compose(
 +  InitialMap = Compose(
-+       InitialMap = CubicScale(
++       InitialMap = CubicScaleToSpecified(
 +         R = __Rmax__;
-+         a0 = 1.0;
 +         Dim = 3;
-+         ExpansionFactor = ExpansionFactor;
++         ExpansionFactorA = ExpansionFactor;
++         ExpansionFactorB = ExpansionFactorOuterBdry;
 +       );
 +       FinalMap = RotationAndScaling(
 +         ExpansionFactor=Unity;
