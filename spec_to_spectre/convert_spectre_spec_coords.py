@@ -15,6 +15,7 @@ def rename_variables(legend_line):
     legend_line = legend_line.replace('kappax', 'Phi_x').replace('kappay', 'Phi_y').replace('kappaz', 'Phi_z')
     legend_line = legend_line.replace('GradH', 'SpacetimeDerivInitialGaugeH_')
     legend_line = legend_line.replace(' H', ' InitialGaugeH_')
+    legend_line = legend_line.replace('GridToInertial::MappedCoords', 'GridToInertialMappedCoords_')
     return legend_line.rstrip()
 
 def get_spec_points(spectre_file):
@@ -27,13 +28,13 @@ def get_spec_points(spectre_file):
     components = ['InertialCoordinates_x', 'InertialCoordinates_y', 'InertialCoordinates_z']
     dim = len(components)
 
-    coords = []
-    for component in components:
-        coords.append([])
+    coords = [[], [], []]
 
     for i,component in enumerate(components):
-        coords[i].append(coords_dict[component])
-    return np.transpose(np.array([np.concatenate(x) for x in coords]))
+        coords[i] = np.array(coords_dict[component])
+    coords = np.asarray(coords)
+    return np.transpose(coords)
+    # return np.transpose(np.array([np.concatenate(x) for x in coords]))
 
 def write_spec_points_file(spectre_points_filename, spec_points_filename):
     """Read the coordinates from a spectre domain and write them in a
